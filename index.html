@@ -1,0 +1,38 @@
+<!doctype html><html lang="en"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="theme-color" content="#d4af37"><meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-title" content="TWC Recovery">
+<link rel="manifest" href="manifest.webmanifest"><link rel="apple-touch-icon" href="apple-touch-icon.png">
+<title>TWC Recovery Calculator</title>
+<style>
+:root{--bg:#090909;--card:#151515;--gold:#d4af37;--line:#2b2b2b}*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:#fff;font-family:Arial,sans-serif}main{max-width:700px;margin:auto;padding:18px 14px 40px}
+.logo{text-align:center;font-size:29px;font-weight:900;letter-spacing:2px;color:var(--gold)}.sub{text-align:center;color:#aaa;margin:4px 0 20px}
+.card{background:var(--card);border:1px solid var(--line);border-radius:16px;padding:16px;margin:12px 0}h2{color:var(--gold);font-size:18px;margin:0 0 14px}
+label{display:block;font-size:13px;color:#ccc;margin:11px 0 6px}input,select{width:100%;padding:13px;border-radius:10px;border:1px solid #444;background:#090909;color:#fff;font-size:17px}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:10px}.row{display:flex;justify-content:space-between;padding:9px 0;border-bottom:1px solid var(--line)}.big{text-align:center;color:var(--gold);font-size:29px;font-weight:900;padding:16px 0}button{width:100%;padding:13px;margin-top:10px;border:0;border-radius:10px;background:var(--gold);font-weight:800;font-size:16px}small{color:#888}
+</style></head><body><main>
+<div class="logo">TWC RECOVERY</div><div class="sub">Recovery Quote Calculator</div>
+<section class="card"><h2>Customer Quote</h2>
+<label>Recovery vehicle</label><select id="vehicle"><option value="porsche">Porsche Cayenne 4.2 V8</option><option value="touareg">Volkswagen Touareg V6 3.0</option></select>
+<label>One-way recovery miles</label><input id="oneWay" type="number" min="0" step="0.1" value="37">
+<div class="grid"><div><label>Callout (£)</label><input id="callout" type="number" value="150" step="0.01"></div><div><label>Miles included</label><input id="included" type="number" value="13" step="0.1"></div></div>
+<div class="grid"><div><label>Extra £ / mile</label><input id="rate" type="number" value="3" step="0.01"></div><div><label>VAT %</label><input id="vat" type="number" value="20" step="0.1"></div></div>
+<div class="row"><span>Additional miles</span><b id="extra">0</b></div><div class="row"><span>Mileage charge</span><b id="mileageCharge">£0.00</b></div><div class="row"><span>Net quote</span><b id="net">£0.00</b></div><div class="row"><span>VAT</span><b id="vatAmount">£0.00</b></div>
+<div class="big">CUSTOMER TOTAL<br><span id="total">£0.00</span></div></section>
+<section class="card"><h2>Profitability</h2><div class="row"><span>Vehicle cost per mile</span><b id="cpm">£0.00</b></div>
+<label>Actual total miles driven (including empty return)</label><input id="actualMiles" type="number" value="74" step="0.1"><small>Defaults to 2× one-way miles.</small>
+<div class="row"><span>Estimated recovery cost</span><b id="cost">£0.00</b></div><div class="row"><span>Gross profit before VAT</span><b id="profit">£0.00</b></div>
+<div class="row"><span>Profit per customer mile</span><b id="profitCustomer">£0.00</b></div><div class="row"><span>Profit per actual mile</span><b id="profitActual">£0.00</b></div><div class="row"><span>Gross profit margin</span><b id="margin">0.0%</b></div></section>
+<section class="card"><h2>Settings</h2><div class="grid"><div><label>Porsche cost/mile</label><input id="porscheCpm" value="1.382336" step="0.000001" type="number"></div><div><label>Touareg cost/mile</label><input id="touaregCpm" value="1.285550" step="0.000001" type="number"></div></div>
+<button id="save">Save Settings</button><button id="reset" style="background:#333;color:#fff">Reset Defaults</button></section>
+</main>
+<script>
+(function(){const $=id=>document.getElementById(id),n=id=>{let x=parseFloat($(id).value);return Number.isFinite(x)?x:0},m=x=>"£"+x.toFixed(2);
+function calc(){let o=n("oneWay"),c=n("callout"),i=n("included"),r=n("rate"),v=n("vat")/100,e=Math.max(o-i,0),mc=e*r,net=c+mc,va=net*v,tot=net+va,cp=$( "vehicle").value==="porsche"?n("porscheCpm"):n("touaregCpm"),am=n("actualMiles"),cost=am*cp,p=net-cost;
+$("extra").textContent=e.toFixed(1);$("mileageCharge").textContent=m(mc);$("net").textContent=m(net);$("vatAmount").textContent=m(va);$("total").textContent=m(tot);$("cpm").textContent=m(cp);$("cost").textContent=m(cost);$("profit").textContent=m(p);$("profitCustomer").textContent=m(o?p/o:0);$("profitActual").textContent=m(am?p/am:0);$("margin").textContent=(net?p/net*100:0).toFixed(1)+"%"}
+["vehicle","oneWay","callout","included","rate","vat","actualMiles","porscheCpm","touaregCpm"].forEach(id=>$(id).addEventListener("input",()=>{if(id==="oneWay")$("actualMiles").value=(n("oneWay")*2).toFixed(1);calc()}));
+$("save").onclick=()=>{let a=["callout","included","rate","vat","porscheCpm","touaregCpm"],d={};a.forEach(x=>d[x]=$(x).value);localStorage.twcRecoverySettings=JSON.stringify(d);calc()};
+$("reset").onclick=()=>{let d={callout:150,included:13,rate:3,vat:20,porscheCpm:1.382336,touaregCpm:1.28555};Object.entries(d).forEach(([k,v])=>$(k).value=v);$("oneWay").value=37;$("actualMiles").value=74;localStorage.removeItem("twcRecoverySettings");calc()};
+try{let d=JSON.parse(localStorage.twcRecoverySettings||"{}");Object.keys(d).forEach(k=>{if($(k))$(k).value=d[k]})}catch(e){}calc()})();
+</script></body></html>
